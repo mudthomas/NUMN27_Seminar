@@ -1,2 +1,2 @@
-# NUMN28_Seminar
-NUMN28 - Seminar Course in Numerical Analysis
+# NUMN27_Seminar
+NUMN27 - Seminar Course in Numerical Analysis
