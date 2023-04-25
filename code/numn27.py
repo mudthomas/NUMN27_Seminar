@@ -150,7 +150,7 @@ class IDT(RK):
             temp += b[i] * np.inner(self.problem.etaprim(stage_values[i]), f_eval[i])
         return lambda gamma: self.problem.eta(y + gamma * h * sumbf) - self.problem.eta(y) - gamma * h * temp
 
-    def r_plot(self):
+    def r_plot(self, filename="r_of_gamma.pdf"):
         y = self.problem.y0
         t = self.problem.t0
         for h in [0.12, 0.10, 0.08]:
@@ -167,7 +167,7 @@ class IDT(RK):
         plt.ylabel("$r(\\gamma)$")
         plt.legend()
         plt.grid()
-        plt.savefig("r_of_gamma.pdf")
+        plt.savefig(filename)
         plt.show()
 
         return gamma_list, r_list
@@ -626,7 +626,7 @@ if __name__ == "__main__":
 
         def do_plot_1a():
             solver = relaxedSSPRK33(test_problem1)
-            solver.r_plot()
+            solver.r_plot("P1_r_of_gamma.pdf")
 
         def do_plot_1b():
             for solver in solvers_RRK:
@@ -679,11 +679,41 @@ if __name__ == "__main__":
                       titles=["IDT SSPRK(3,3)", "IDT RK(4,4)", "IDT VRK(9,6)"],
                       filename="P1_IDT_RK4.pdf")
 
-        do_plot_1a()
-        do_plot_1b()
-        do_plot_2a()
-        do_plot_2b()
-        do_plot_2c()
+        def do_gamma_plot():
+            RKtypes = ["SSPRK(3,3)", "RK(4,4)"]
+            RKfilenames = ["SSPRK33", "RK44"]
+            stepsize = 0.01
+            end_point = 5
+            for i in range(len(solvers_classic)):
+                approx = solvers_classic[i](test_problem1)
+                approx._set_h(stepsize)
+                t_list, y_list = approx.simulate(end_point)
+                plt.semilogy(t_list[:-1], [np.abs(entropy1(y_list[j]) - entropy1(exact_sol(t_list[j]))) for j in range(len(t_list[:-1]))], label="Classic method")
+
+                approx = solvers_RRK[i](test_problem1)
+                approx._set_h(stepsize)
+                t_list, y_list = approx.simulate(end_point)
+                plt.semilogy(t_list[:-1], [np.abs(entropy1(y_list[j]) - entropy1(exact_sol(t_list[j]))) for j in range(len(t_list[:-1]))], label="RRK")
+
+                approx = solvers_IDT[i](test_problem1)
+                approx._set_h(stepsize)
+                t_list, y_list = approx.simulate(end_point)
+                plt.semilogy(t_list[:-1], [np.abs(entropy1(y_list[j]) - entropy1(exact_sol(t_list[j]))) for j in range(len(t_list[:-1]))], label="IDT")
+
+                plt.title(f"Error in entropy of approximations\n of problem 1 using {RKtypes[i]} with $\\Delta t= {stepsize}$")
+                plt.xlabel("Time, $t$")
+                plt.ylabel("$|\\eta(u_i)-\\eta (u(t_i))|$")
+                plt.legend()
+                plt.grid()
+                plt.savefig(f"P1_eta_error_{RKfilenames[i]}.pdf")
+                plt.show()
+
+        # do_plot_1a()
+        # do_plot_1b()
+        # do_plot_2a()
+        # do_plot_2b()
+        # do_plot_2c()
+        do_gamma_plot()
 
     def do_problem_2():
         solvers_classic = [classicSSPRK33, classicRK4, classicVRK96, classicVRK138]
@@ -706,7 +736,7 @@ if __name__ == "__main__":
 
         def do_plot_1a_2():
             solver = relaxedSSPRK33(test_problem2)
-            solver.r_plot()
+            solver.r_plot("P2_r_of_gamma.pdf")
 
         def do_plot_1b_2():
             for solver in solvers_RRK:
@@ -752,11 +782,41 @@ if __name__ == "__main__":
                       titles=["IDT SSPRK(3,3)", "IDT RK(4,4)", "IDT VRK(9,6)", "IDT VRK(13, 8)"],
                       filename="P2_IDT_RK4.pdf")
 
-        do_plot_1a_2()
-        do_plot_1b_2()
-        do_plot_3a()
-        do_plot_3b()
-        do_plot_3c()
+        def do_gamma_plot():
+            RKtypes = ["SSPRK(3,3)", "RK(4,4)", "VRK(9,6)", "VRK(13, 8)"]
+            RKfilenames = ["SSPRK33", "RK44", "VRK96", "VRK138"]
+            stepsize = 0.01
+            end_point = 20
+            for i in range(len(solvers_classic)):
+                approx = solvers_classic[i](test_problem2)
+                approx._set_h(stepsize)
+                t_list, y_list = approx.simulate(end_point)
+                plt.semilogy(t_list[:-1], [np.abs(entropy2(y_list[j]) - entropy2(exact_sol(t_list[j]))) for j in range(len(t_list[:-1]))], label="Classic method")
+
+                approx = solvers_RRK[i](test_problem2)
+                approx._set_h(stepsize)
+                t_list, y_list = approx.simulate(end_point)
+                plt.semilogy(t_list[:-1], [np.abs(entropy2(y_list[j]) - entropy2(exact_sol(t_list[j]))) for j in range(len(t_list[:-1]))], label="RRK")
+
+                approx = solvers_IDT[i](test_problem2)
+                approx._set_h(stepsize)
+                t_list, y_list = approx.simulate(end_point)
+                plt.semilogy(t_list[:-1], [np.abs(entropy2(y_list[j]) - entropy2(exact_sol(t_list[j]))) for j in range(len(t_list[:-1]))], label="IDT")
+
+                plt.title(f"Error in entropy of approximations\n of problem 2 using {RKtypes[i]} with $\\Delta t= {stepsize}$")
+                plt.xlabel("Time, $t$")
+                plt.ylabel("$|\\eta(u_i)-\\eta (u(t_i))|$")
+                plt.legend()
+                plt.grid()
+                plt.savefig(f"P2_eta_error_{RKfilenames[i]}.pdf")
+                plt.show()
+
+        # do_plot_1a_2()
+        # do_plot_1b_2()
+        # do_plot_3a()
+        # do_plot_3b()
+        # do_plot_3c()
+        do_gamma_plot()
 
     def do_problem_3():
         def func3(t, y):
@@ -774,6 +834,6 @@ if __name__ == "__main__":
         solver.simulate(5)
         solver.plot()
 
-    # do_problem_1()
+    do_problem_1()
     do_problem_2()
     # do_problem_3()
