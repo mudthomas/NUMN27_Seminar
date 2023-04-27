@@ -11,6 +11,7 @@
 \usepackage{algorithm}
 \usepackage{nccmath}
 \usepackage{cite}
+\usepackage{hyperref}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -220,7 +221,7 @@ In order to show that \(r\) has a positive root we need two things. Firstly that
         Let a Runge-Kutta method be given such that \(\sum_{i,j=1}^{s}b_{i}(a_{i,j} - b_j)<0\). If \(\eta''(u^n)(f_0,f_0) > 0\) then \(r'(1)>0\) for sufficiently small \(\Delta t > 0\).
     \end{lemma}
 
-    \vspace*{10mm}
+    \vspace*{5mm}
     Note that the assumption \(\sum_{i,j=1}^{s}b_{i}(a_{i,j} - b_j)<0\) is reasonable. Since \(\sum_{i,j=1}^{s}b_{i}b_j = 1\) and \(\sum_{i=1}^{s}b_{i}a_{i,j}=1/2\) is a condition for second-order accuracy we have that \(\sum_{i,j=1}^{s}b_{i}(a_{i,j} - b_j)=-1/2\)
 
     \begin{proof}
@@ -538,6 +539,6 @@ A practice, an adaptation in code could take the entropy as an optional argument
 % as suggested by Ketcheson in \cite{ketcheson2019relaxation} could be used.
 
 \bibliography{refs}{}
-\bibliographystyle{plain}
+\bibliographystyle{ieeetr}
 
 \end{document}
