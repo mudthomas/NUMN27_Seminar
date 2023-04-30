@@ -55,8 +55,8 @@
 \maketitle
 \section{Introduction}
 
-For certain simulations it is of utmost importance to use methods that follow conservation laws, making sure that the model stays true to physical laws. While there are already established methods for this, they are not as well known nor as simple to set up as the Runge-Kutta method. We will present the idea put forward by Ranocha et al. in \cite{Ranocha_2020} and attempt to replicate their result. We shall see that not only is the modification suggested in the article by both simple and cheap, it is also accurate.
-As this report is based on \cite{Ranocha_2020} we concern ourself mainly with the statements made there. A few of their references, those deemed as significant by this author, will be repeated here.
+For certain simulations it is of utmost importance to use methods that follow conservation laws, making sure that the model stays true to physical laws. While there are already established methods for this, they are not as well known nor as simple to set up as the Runge-Kutta method. We will present the idea put forward by Ranocha et al. in \cite{Ranocha_2020} and attempt to replicate their result. We shall see that not only is the method suggested in the article by both simple and cheap, it is also accurate.
+As this report is based on \cite{Ranocha_2020} we concern ourself mainly with the statements made there. A few of their references will be repeated here.
 
 \section{Preliminaries}
 \subsection{ODE}
@@ -77,11 +77,14 @@ As this report is based on \cite{Ranocha_2020} we concern ourself mainly with th
     The change in entropy over time is given by
     \[\frac{\text{d}}{\text{d}t} \eta (u(t)) = \inner{\eta'(u(t))}{f(t, u(t))}.\]
 
-    \vspace*{5mm}
-    A entropy dissipative system will satisfy
-    \[\inner{\eta'(u(t))}{f(t, u(t))} \leq 0, \quad \forall u \in \mathcal{H}, t \in [0, T],\]
-    and a entropy conservative system will satisfy
-    \[\inner{\eta'(u(t))}{f(t, u(t))} = 0, \quad \forall u \in \mathcal{H}, t \in [0, T].\]
+    An entropy dissipative system will satisfy
+    \begin{equation}\label{Eq_dissipative}
+        \inner{\eta'(u(t))}{f(t, u(t))} \leq 0, \quad \forall u \in \mathcal{H}, t \in [0, T],
+    \end{equation}
+    and an entropy conservative system will satisfy
+    \begin{equation}\label{Eq_conservative}
+        \inner{\eta'(u(t))}{f(t, u(t))} = 0, \quad \forall u \in \mathcal{H}, t \in [0, T].
+    \end{equation}
 
 
 \subsection{Classic Runge-Kutta}
@@ -111,8 +114,7 @@ As this report is based on \cite{Ranocha_2020} we concern ourself mainly with th
 \section{Relaxation Runge-Kutta Methods}
 \subsection{Relaxation Runge-Kutta}
     The basic idea of the Relaxed Runge-Kutta method is to introduce a scaling factor to the weights \(b_i\). We call this scaling factor \(\gamma_n \in \mathbb{R}\) and construct a new scheme
-    \[u^{n+1}_{\gamma} = u^{n} + \gamma_n \Delta t \sum_{i=1}^{s} b_i f_i,\]
-    with \(\gamma_n \in \mathbb{R}\).
+    \[u^{n+1}_{\gamma} = u^{n} + \gamma_n \Delta t \sum_{i=1}^{s} b_i f_i, \quad \text{ with } \gamma_n \in \mathbb{R}.\]
 
     \vspace*{10mm}
     Relaxed Runge-Kutta, RRK, interprets \(u_{\gamma}^{n+1} \approx u(t_n + \gamma \Delta t)\). This means that using this method we will not be using a uniform step length and the number of steps might not be the same as with the regular RK method.
@@ -122,11 +124,19 @@ As this report is based on \cite{Ranocha_2020} we concern ourself mainly with th
 
     \vspace*{5mm}
     In~\cite{ketcheson2019relaxation} it was proposed choosing \(\gamma_n\) such that
-    \[ \frac{\norm{u^{n+1}_{\gamma}}^2 - \norm{u^{n}}^2}{2} = \gamma_n \Delta t \sum_{i=1}^{s} b_i \inner{y_i}{f_i} .\]
+    \[ \frac{\norm{u^{n+1}_{\gamma}}^2 - \norm{u^{n}}^2}{2} = \gamma_n \Delta t \sum_{i=1}^{s} b_i \inner{y_i}{f_i}.\]
 
-    In this article however the suggestion is to instead use \(\gamma_n\) fulfilling the condition
-    \[  \eta (u^{n+1}_{\gamma}) - \eta (u^{n}) = \gamma \Delta t \sum_{i=1}^{s} b_i \inner{\eta'(y_i)}{f_i}.\]
-    This is done by finding a root of
+    This article instead revolves around proving that a new suggestion of \(\gamma_n\) fulfilling the condition
+    \[  \eta (u^{n+1}_{\gamma}) - \eta (u^{n}) = \gamma \Delta t \sum_{i=1}^{s} b_i \inner{\eta'(y_i)}{f_i},\]
+    is sound. The basis of this guess is that it will retain the convexity and also preserve the behavior of
+    \[
+        \eta(u^{n+1}) \leq \eta(u^{n})
+    \]
+    for dissipative problem as described in Equation~\ref{Eq_dissipative} and
+    \[
+        \eta(u^{n+1}) = \eta(u^{0})
+    \]
+    for a conservative problem as described in Equation~\ref{Eq_conservative}. We ensure that this condition is fulfilled by finding a root of
     \begin{equation}\label{Eq_r}
         r(\gamma) = \eta (u^{n} + \gamma_n \Delta t \sum_{i=1}^{s} b_i f_i) - \eta (u^{n}) - \gamma \Delta t \sum_{i=1}^{s} b_i \inner{\eta'(y_i)}{f_i}.
     \end{equation}
@@ -140,11 +150,10 @@ As this report is based on \cite{Ranocha_2020} we concern ourself mainly with th
 
     Note that since \(\eta\) is convex we have that \(r\) is convex in \(\gamma\).
 
-    We note also that since
+    We note also \(r\) has a root at \(0\) since
     \begin{equation}\label{Eq_r_at_0}
-        r(0) = \eta (u^{n} + 0) - \eta (u^{n}) - 0 = 0
+        r(0) = \eta (u^{n} + 0) - \eta (u^{n}) - 0 = 0.
     \end{equation}
-    \(r\) has a root at \(0\).
 
     Using a non-positive \(\gamma\) would not be feasible. A zero-valued \(\gamma\) would halt the scheme, while a negative \(\gamma\) would amount to steps backwards in time.
 
@@ -366,7 +375,6 @@ In order to show that \(r\) has a positive root we need two things. Firstly that
         \[r(\gamma = 1) = \mathcal{O}(\Delta t^{p+1}).\]
     \end{proof}
 
-    \vspace*{5mm}
     With these results we can now construct the main theorem.
     \begin{theorem}\label{Th_main}
         Assume there exists a positive root \(\gamma_n\) of \(r\). Consider the IDT/RRK methods based on a given Runge-Kutta method that is \(p\)-order accurate. Then
@@ -396,7 +404,7 @@ In order to show that \(r\) has a positive root we need two things. Firstly that
     Because of this we are in our relevant examples regarding the second to last value instead of the last.
 
     \vspace*{5mm}
-    We are studying the effects of values of \(\Delta t\) close to \(1\) in the examples. These are not reasonable choices for \(\Delta t\), as the roots of \(r\) become less predictable. For the scalar root finding the method \texttt{scipy.optimize.root\_scalar} was used within the hardcoded range \( \left[0.5,2\right] \) was used.
+    We are studying the effects of values of \(\Delta t\) close to \(1\) in the examples. These are large and unreasonable choices for \(\Delta t\), also the roots of \(r\) become less predictable. For the scalar root finding the method \texttt{scipy.optimize.root\_scalar} within the hardcoded range \( \left[0.5,2\right] \) was used. This could be done in a better way if the stepsizes were more reasonable chosen.
 
     \vspace*{5mm}
     Note that fewer RK-methods were used for Problem 1 than in Problem 2. This is because the higher order Runge-Kutta methods resulted in an error from the method \texttt{isClose} used somewhere in \texttt{Assimulo}, a library of solvers that ours were written to inherit from.
@@ -405,7 +413,7 @@ In order to show that \(r\) has a positive root we need two things. Firstly that
     The problems presented in this section are two of the same used in the article~\cite{Ranocha_2020}, with the only change being that the source had swapped the first and second position of the analytic solution.
 
     \vspace*{5mm}
-    The Butcher tableaus for SSPRK(3,3) and RK(4,4) were sourced online from~\cite{wikipedia_RK} while the ones for VRK(9,6) and VRK(13,8) were taken from~\cite{VRK96} and~\cite{VRK138} respectively.
+    The Butcher tableaus for SSPRK(3,3) and RK(4,4) were sourced online from~\cite{wikipedia_RK}, which is not the original source in \cite{Ranocha_2020}. The tableaus for VRK(9,6) and VRK(13,8) were taken from~\cite{VRK96} and~\cite{VRK138} respectively, the same sources as in \cite{Ranocha_2020}.
 
 \subsection{Problem 1 - Conserved exponential entropy}
     For this problem we consider the system
